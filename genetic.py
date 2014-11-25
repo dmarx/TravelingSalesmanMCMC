@@ -9,7 +9,8 @@ def genetic_optimization(x0,
                          mutation,
                          generations=1e5,
                          mortality=.5,
-                         mutation_probability=.1):
+                         mutation_probability=.1,
+                         verbose=True):
     """
     Generic function for maximiation via genetic algorithm.
     
@@ -29,9 +30,12 @@ def genetic_optimization(x0,
         fitness = np.apply_along_axis(cost, 0, x0)        
         #survivors = fitness.argsort()[:k:-1]
         survivors = fitness.argsort()[-k:]
+        if verbose and j%100==0:
+            print "TRACKING", j, solution['fitness'], fitness[survivors[-1]]
         if fitness[survivors[-1]] > solution['fitness']:
             solution = {'value':x0[:,survivors[-1]], 'fitness':fitness[survivors[-1]]}
-            print j, solution['fitness']
+            if verbose:
+                print "IMPROVEMENT", j, solution['fitness']
         fitness = fitness[survivors] # kill of 50% least fit.        
         prob = fitness/fitness.sum() # normalize (probably not necessary)
         
@@ -57,7 +61,7 @@ def genetic_optimization(x0,
         #x0 = children.copy() # Doesn't solve the problem
         x0 = children
         
-    return solution
+    return solution, x0
         
 
 def propose_path(path, n=None, swaps=1, closed=True):    
@@ -188,13 +192,13 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     np.random.seed(1)
     # generate random points and plot
-    pathlen = 30
+    pathlen = 15
     nodes = np.random.choice(range(100), 2*pathlen, replace=True).reshape([pathlen, 2])
 
     #test = genetic_salesman(nodes, 500, euclidean, generations=50000, mortality=.1, swaps=1, mutation_probability=.05)
-    test = genetic_salesman(nodes, 300, euclidean, generations=1000, mortality=.005, swaps=1, mutation_probability=.05)
-    solution = np.asarray(test['value'], dtype=int)
-    xy = nodes[solution]
+    solution, state = genetic_salesman(nodes, 100, euclidean, generations=1000, mortality=.05, swaps=1, mutation_probability=.2)
+    path = np.asarray(solution['value'], dtype=int)
+    xy = nodes[path]
     plt.scatter(*zip(*nodes))
     plt.plot(*xy.T)
     plt.show()
