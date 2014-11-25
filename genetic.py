@@ -66,13 +66,15 @@ def propose_path(path, n=None, swaps=1, closed=True):
     to the in put path.
     """
     swaps = np.random.choice(range(1,swaps+1))
+    #print swaps
     if not n:
         n = len(path)
     path2 = path.copy() # we don't want to operate on the input
     if closed:
-        ix = np.random.choice(range(1,n), 2*swaps) # ignore first position in closed circuit, enforce all candidates start/end at same location.
+        ix = np.random.choice(range(1,n), 2*swaps, replace=False) # ignore first position in closed circuit, enforce all candidates start/end at same location.
     else:
-        ix = np.random.choice(range(n), 2*swaps)
+        ix = np.random.choice(range(n), 2*swaps, replace=False)
+    #print ix
     path2[ix] = path2[ix[::-1]]
     return path2 # do we need the return value here? Are we modifying in place?
     
@@ -186,11 +188,11 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     np.random.seed(1)
     # generate random points and plot
-    pathlen = 20
+    pathlen = 30
     nodes = np.random.choice(range(100), 2*pathlen, replace=True).reshape([pathlen, 2])
 
     #test = genetic_salesman(nodes, 500, euclidean, generations=50000, mortality=.1, swaps=1, mutation_probability=.05)
-    test = genetic_salesman(nodes, 200, euclidean, generations=1000, mortality=.05, swaps=1, mutation_probability=.05)
+    test = genetic_salesman(nodes, 300, euclidean, generations=1000, mortality=.005, swaps=1, mutation_probability=.05)
     solution = np.asarray(test['value'], dtype=int)
     xy = nodes[solution]
     plt.scatter(*zip(*nodes))
